@@ -1,5 +1,4 @@
 const express = require('express');
-// const morgan = require('morgan');
 const app = express();
 const port = 3000;
 
@@ -8,7 +7,6 @@ const mockUser = [
     { id: 2, name: "Loc", add: "HN" },
     { id: 3, name: "Nhi", add: "QN" }
 ];
-// app.use(morgan('combined'));
 
 app.get('/api/user', (req, res) => {
     res.send(mockUser);
