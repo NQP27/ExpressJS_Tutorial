@@ -57,7 +57,7 @@ app.put('/api/users/:id', (req, res) => {
     const findUserIndex = mockUser.findIndex((user) => user.id === parsedId);
     if (findUserIndex === -1) { return res.sendStatus(404); }
     mockUser[findUserIndex] = { id: parsedId, ...body };
-    res.sendStatus(200);
+    return res.sendStatus(200);
 });
 
 app.patch('/api/users/:id', (req, res) => {
@@ -69,7 +69,19 @@ app.patch('/api/users/:id', (req, res) => {
     const findUserIndex = mockUser.findIndex((user) => user.id === parsedId);
     if (findUserIndex === -1) { return res.sendStatus(404); }
     mockUser[findUserIndex] = {...mockUser[findUserIndex], ...body };
-    res.sendStatus(200);
+    return res.sendStatus(200);
+});
+
+app.delete('/api/users/:id', (req, res) => {
+    const { params: { id } } = req;
+    const parsedId = parseInt(id);
+    if (isNaN(parsedId)) {
+        return res.sendStatus(400);
+    }
+    const findUserIndex = mockUser.findIndex((user) => user.id === parsedId);
+    if (findUserIndex === -1) { return res.sendStatus(404); }
+    mockUser.splice(findUserIndex, 1);
+    return res.sendStatus(200);
 });
 
 
