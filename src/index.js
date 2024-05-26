@@ -1,6 +1,8 @@
 const express = require('express');
 const app = express();
 const port = 3000;
+const { query, validationResult } = require("express-validator");
+const { userValidationSchema } = require('./utils/validationSchema.js');
 
 const mockUser = [
     { id: 1, name: "Phuoc", add: "TB" },
@@ -31,21 +33,30 @@ const handleIndexByUserId = (req, res, next) => {
 app.use(express.json());
 // app.use(loggingMiddleWare);
 
-app.get('/api/users/', (req, res) => {
-    res.send(mockUser);
-});
-
 // app.get('/api/users/', (req, res) => {
-//     console.log(req.query);
-//     const {
-//         query: { filter, value }
-//     } = req;
-//     if (!filter && !value) { return res.send(mockUser); }
-//     if (filter && value) {
-//         return res.send(mockUser.filter((user) => user[filter].includes(value)))
-//             // return res.send(mockUser.filter((user) => user.name.includes(value)))
-//     }
+//     res.send(mockUser);
 // });
+
+app.get('/api/users/', [
+        query('value')
+        .isString().withMessage('Name must be a string!')
+        .notEmpty().withMessage('Name must be not empty!')
+        .isLength({ min: 3, max: 10 }).withMessage('Name must be between 3-10 charactors')
+    ],
+    (req, res) => {
+        // console.log(req.query);
+        result = validationResult(req);
+        console.log(result);
+        const {
+            query: { filter, value }
+        } = req;
+        if (!filter && !value) { return res.send(mockUser); }
+        if (filter && value) {
+            if (!result.isEmpty()) { return res.send(result) } else
+                return res.send(mockUser.filter((user) => user[filter].includes(value)))
+                    // return res.send(mockUser.filter((user) => user.name.includes(value)))
+        }
+    });
 
 app.get('/api/users/:id', (req, res) => {
     console.log(req.params);
@@ -61,11 +72,15 @@ app.get('/api/users/:id', (req, res) => {
 
 
 //Thêm 
-app.post('/api/users', (req, res) => {
-    console.log(req.body);
+app.post('/api/users', userValidationSchema, (req, res) => {
+    result = validationResult(req);
+    console.log(result);
     const { body } = req;
     const newUser = { id: mockUser[mockUser.length - 1].id + 1, ...body }
-    mockUser.push(newUser);
+    if (!result.isEmpty()) {
+        return res.send(result);
+    } else
+        mockUser.push(newUser);
     return res.status(201).send(newUser);
 });
 
